@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Descubra seu curso ideal{% endblock %}
+{% block content %}
+
+<section class="text-center">
+  <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white border border-violet-200 text-violet-700 text-sm shadow-sm">
+    🧠 Sistema Inteligente de Orientação Vocacional
+  </div>
+
+  <h1 class="text-5xl md:text-6xl font-extrabold text-violet-700 mt-6">Descubra Seu Curso Ideal</h1>
+  <p class="max-w-2xl mx-auto text-zinc-600 mt-4">
+    Utilizamos algoritmo KNN para analisar seu perfil acadêmico e recomendar o curso técnico perfeito.
+  </p>
+
+  <div class="mt-8 flex items-center justify-center gap-4">
+    <a href="{{ url_for('predict_page') }}" class="btn-primary">Iniciar Análise</a>
+    <a href="#como-funciona" class="btn-white">Saber Mais</a>
+  </div>
+</section>
+
+<section id="como-funciona" class="grid md:grid-cols-3 gap-6 mt-14">
+  <div class="card">
+    <div class="text-3xl">🧩</div>
+    <h3 class="card-title">Análise Inteligente</h3>
+    <p class="card-text">O KNN compara seu perfil com estudantes bem-sucedidos.</p>
+  </div>
+  <div class="card">
+    <div class="text-3xl">📈</div>
+    <h3 class="card-title">Precisão</h3>
+    <p class="card-text">Base de respostas consolidada em Excel.</p>
+  </div>
+  <div class="card">
+    <div class="text-3xl">🎯</div>
+    <h3 class="card-title">Personalização</h3>
+    <p class="card-text">Recomendações alinhadas às suas habilidades.</p>
+  </div>
+</section>
+{% endblock %}

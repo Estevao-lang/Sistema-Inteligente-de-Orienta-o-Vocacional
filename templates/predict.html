@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Análise de Perfil – KNN{% endblock %}
+{% block content %}
+
+<h2 class="text-3xl font-extrabold text-violet-700 text-center">Perfil do Estudante</h2>
+<p class="text-zinc-600 text-center mb-8">Preencha suas informações para análise do algoritmo KNN</p>
+
+<div class="grid md:grid-cols-2 gap-8">
+  <!-- Form -->
+  <form method="post" class="card space-y-5">
+    <div>
+      <label class="label">Nome Completo</label>
+      <input name="nome" value="{{ nome or '' }}" placeholder="Digite seu nome" class="inp">
+    </div>
+
+    <h3 class="font-semibold text-zinc-700">Avalie suas Habilidades (0–10)</h3>
+
+    {% set default = {'matematica':5,'portugues':5,'ciencias':5,'logica':5,'criatividade':5,'interpessoal':5} %}
+    {% set s = skills or default %}
+
+    {% for key, label in {
+      'matematica':'Matemática','portugues':'Português','ciencias':'Ciências',
+      'logica':'Raciocínio Lógico','criatividade':'Criatividade','interpessoal':'Relacionamento Interpessoal'
+    }.items() %}
+    <div class="flex items-center gap-4">
+      <div class="w-40 text-zinc-700">{{ label }}</div>
+      <input type="range" min="0" max="10" value="{{ s[key] }}" name="{{ key }}" class="flex-1 range" oninput="this.nextElementSibling.innerText=this.value">
+      <span class="w-8 text-right text-violet-700 font-semibold">{{ s[key] }}</span>
+    </div>
+    {% endfor %}
+
+    <div class="flex gap-3">
+      <a href="{{ url_for('home') }}" class="btn-white flex-1">Voltar</a>
+      <button class="btn-primary flex-1">Analisar Perfil</button>
+    </div>
+  </form>
+
+  <!-- Resultado -->
+  <section class="card">
+    <h3 class="text-2xl font-bold text-violet-700 text-center mb-3">Resultado da Análise KNN</h3>
+
+    {% if resultado %}
+      <p class="text-center mb-4">
+        Olá, <strong class="capitalize">{{ nome or 'estudante' }}</strong>! Analisamos seu perfil.
+      </p>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <!-- Melhor compatibilidade -->
+        <div class="box-soft">
+          <p class="text-sm text-zinc-500">Melhor Compatibilidade</p>
+          <div class="text-xl font-bold mt-1">{{ resultado.curso_recomendado }}</div>
+          <div class="h-2 bg-zinc-200 rounded-full mt-2">
+            <!-- em vez de style="width: ..." usamos data-p e JS define a largura -->
+            <div class="h-2 rounded-full bg-violet-500 js-bar" data-p="{{ (resultado.confianca*100)|round(0) }}"></div>
+          </div>
+          <p class="text-xs text-zinc-500 mt-1">Compatibilidade {{ (resultado.confianca*100)|round(0) }}%</p>
+
+          <div class="note mt-3">
+            <strong>Recomendação</strong><br>
+            Use este curso como direção principal; veja também os outros compatíveis.
+          </div>
+        </div>
+
+        <!-- Radar -->
+        <div class="box-soft">
+          <canvas id="radar" height="260"></canvas>
+        </div>
+      </div>
+
+      <!-- Todas compatibilidades -->
+      <div class="grid md:grid-cols-3 gap-4 mt-6">
+        {% for c,p in resultado.topk + [('Exatas',0.0),('Humanas',0.0)] %}
+          <div class="box-plain">
+            <div class="font-semibold">{{ c }}</div>
+            <div class="h-2 bg-zinc-200 rounded-full mt-2">
+              <div class="h-2 rounded-full bg-violet-500 js-bar" data-p="{{ (p*100)|round(0) }}"></div>
+            </div>
+            <div class="text-xs text-zinc-500 mt-1">{{ (p*100)|round(0) }}%</div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <p class="text-center text-xs text-zinc-500 mt-6">Algoritmo KNN com K=5 (vizinhos mais próximos)</p>
+
+      <div class="text-center mt-4">
+        <a href="{{ url_for('predict_page') }}" class="btn-white">Fazer Nova Análise</a>
+      </div>
+
+      <!-- dados em JSON "puro" para o radar -->
+      <script type="application/json" id="skills-data">
+        {{ (skills or default)|tojson|safe }}
+      </script>
+
+      <script>
+        // Preenche larguras das barras sem usar Jinja dentro de CSS
+        document.querySelectorAll('.js-bar').forEach(el => {
+          const p = Number(el.dataset.p || 0);
+          el.style.width = p + '%';
+        });
+
+        // Lê JSON com as habilidades e desenha o radar
+        const skillsEl = document.getElementById('skills-data');
+        const skills = skillsEl ? JSON.parse(skillsEl.textContent) : null;
+
+        if (skills && window.Chart) {
+          const data = {
+            labels: ['Matemática','Português','Ciências','Lógica','Criatividade','Interpessoal'],
+            datasets: [{
+              label: 'Habilidades',
+              data: [
+                skills.matematica, skills.portugues, skills.ciencias,
+                skills.logica, skills.criatividade, skills.interpessoal
+              ],
+              fill: true
+            }]
+          };
+          new Chart(document.getElementById('radar'), {
+            type: 'radar',
+            data,
+            options: {
+              scales: { r: { suggestedMin: 0, suggestedMax: 10, ticks: { stepSize: 2 } } },
+              plugins: { legend: { display: false } }
+            }
+          });
+        }
+      </script>
+    {% else %}
+      <p class="text-center text-zinc-500">Preencha o formulário ao lado e clique em <em>Analisar Perfil</em>.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
