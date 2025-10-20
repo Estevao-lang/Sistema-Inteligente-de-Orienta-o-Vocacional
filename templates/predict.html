@@ -3,7 +3,7 @@
 {% block content %}
 
 <h2 class="text-3xl font-extrabold text-violet-700 text-center">Perfil do Estudante</h2>
-<p class="text-zinc-600 text-center mb-8">Preencha suas informações para análise do algoritmo KNN</p>
+<p class="text-zinc-600 text-center mb-8">Preencha suas informações para análise.</p>
 
 <div class="grid md:grid-cols-2 gap-8">
   <!-- Form -->
@@ -37,7 +37,7 @@
 
   <!-- Resultado -->
   <section class="card">
-    <h3 class="text-2xl font-bold text-violet-700 text-center mb-3">Resultado da Análise KNN</h3>
+    <h3 class="text-2xl font-bold text-violet-700 text-center mb-3">Resultado da análise</h3>
 
     {% if resultado %}
       <p class="text-center mb-4">
@@ -80,7 +80,7 @@
         {% endfor %}
       </div>
 
-      <p class="text-center text-xs text-zinc-500 mt-6">Algoritmo KNN com K=5 (vizinhos mais próximos)</p>
+    
 
       <div class="text-center mt-4">
         <a href="{{ url_for('predict_page') }}" class="btn-white">Fazer Nova Análise</a>

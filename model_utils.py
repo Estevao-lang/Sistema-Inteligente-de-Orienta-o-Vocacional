@@ -1,7 +1,6 @@
-# model_utils.py — versão simples (sem sklearn/pandas)
-from typing import Dict, Any, Tuple, List
+# model_utils_simple.py
+from typing import Dict, List
 
-# pesos por área (0..1 somando ~1)
 WEIGHTS = {
     "Ciencia de Dados": {"matematica":0.32,"logica":0.32,"ciencias":0.16,"criatividade":0.10,"portugues":0.10},
     "Desenvolvimento":  {"logica":0.36,"matematica":0.26,"criatividade":0.18,"portugues":0.10,"interpessoal":0.10},
@@ -12,7 +11,6 @@ WEIGHTS = {
 AREAS: List[str] = list(WEIGHTS.keys())
 
 def _score(skills: Dict[str, float]) -> Dict[str, float]:
-    """Converte notas 0..10 em score 0..1 por área, normalizado."""
     raw = {}
     for area, w in WEIGHTS.items():
         s = 0.0
@@ -22,10 +20,7 @@ def _score(skills: Dict[str, float]) -> Dict[str, float]:
     m = max(raw.values()) if raw else 1.0
     return {a: (v / m if m > 0 else 0.0) for a, v in raw.items()}
 
-# ----------------- APIs compatíveis com o resto do app -----------------
-
 def train_knn_from_excel(excel_path: str) -> dict:
-    """Sem treino. Mantém a assinatura só para a UI não quebrar."""
     return {
         "k": None, "cv_metric": None, "cv_best": None,
         "n_samples": None, "model_path": None, "classes": AREAS,
@@ -33,21 +28,13 @@ def train_knn_from_excel(excel_path: str) -> dict:
     }
 
 def predict_from_answers(answers_dict: dict, **_) -> dict:
-    """Usa apenas os sliders em answers_dict['skills']."""
     skills = answers_dict.get("skills") or {}
     scores = _score(skills)
     ordered = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     curso, conf = ordered[0]
     topk = [(a, round(p, 3)) for a, p in ordered[:3]]
     faixa = "Alta" if conf >= 0.70 else "Média" if conf >= 0.50 else "Baixa"
-    return {
-        "curso_recomendado": curso,
-        "confianca": round(conf, 3),
-        "faixa_confianca": faixa,
-        "topk": topk,
-    }
+    return {"curso_recomendado": curso, "confianca": round(conf, 3), "faixa_confianca": faixa, "topk": topk}
 
 def batch_predict_from_excel(excel_path: str, **_) -> "object":
-    """Opcional: poderia ler um CSV/Excel e aplicar _score linha a linha.
-       Nesta versão simples, deixe sem uso na UI de lote."""
     raise NotImplementedError("Versão simples não processa lote.")
